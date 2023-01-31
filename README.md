@@ -1,6 +1,6 @@
 // AracTakip-GPS-GSM
 // GPS Tracker
-// Made by Sercan Kurt @TA1AFS
+// Made by Sercan Kurt @TA3KRT
 // 2 0 2 2
 
 // Seeeduino XIAO
