@@ -19,6 +19,7 @@ MPU6050 mpu (Wire);
 int b = 0;
 int sns = 0; //Sensor durum
 int mpusure = 0;
+int acilsms = 0;
 
 void GPS(){
   if(Serial1.available()) {
@@ -54,6 +55,13 @@ void BLINK(int b){
 digitalWrite(LED_BUILTIN, LOW);  delay(b); 
 digitalWrite(LED_BUILTIN, HIGH); delay(b);}
 
+void acilkonum(int acilsms) {
+ for (int h=0; h<acilsms; h++){ GPS();    
+         SMS(mesaj=link); delay(1000);
+         if(h>=acilsms) {h=0;} 
+         }
+    }
+
 void MPUBILGI(){
   
  for(int i=0; i<10; i++){
@@ -66,7 +74,7 @@ if (sns==1) {
 if (pos_offset < angle_x - offset_x || neg_offset > angle_x - offset_x || pos_offset < angle_y - offset_y || neg_offset > angle_y - offset_y || pos_offset < angle_z - offset_z || neg_offset > angle_z - offset_z)
     {
   
-  BLINK(b=500);
+  BLINK(b=250);
   mpusure++;   SerialUSB.print("Mpu Süre = "); SerialUSB.println(mpusure);
   SerialUSB.print("AngX = ");       SerialUSB.print(angle_x - offset_x);
   SerialUSB.print("  /  AngY = ");  SerialUSB.print(angle_y - offset_y);
@@ -117,13 +125,14 @@ void setup() {
   SerialUSB.print("  /  offsetY = "); SerialUSB.print(offset_y);
   SerialUSB.print("  /  offsetZ = "); SerialUSB.println(offset_z);
 
- //SMS(mesaj="GPS cihazi baslatildi");
-
+ SMS(mesaj="GPS cihazi baslatildi **** SMS-> 'konumat' (anlik konum) SMS-> 'acilkonum' (art arda konum) SMS-> 'sensorac' (hareket sensorunu ac) SMS-> 'sensorkapat' (hareket sensorunu kapat)");
 }
 
 void loop() {
-GPS();
+  
 MPUBILGI();
+
+GPS();
 
 SIM800L.listen();
 if (SIM800L.available()>0){ response = SIM800L.readStringUntil('\n');}
@@ -136,26 +145,37 @@ if (SIM800L.available()>0){ response = SIM800L.readStringUntil('\n');}
 SIM800L.listen();
 if (SIM800L.available()>0){ response = SIM800L.readStringUntil('\n');}
    if(lastStringLength != response.length()){
-      if(response.indexOf("sensorac")!=-1){    
-         SMS(mesaj="Hareket Sensoru Aktif");   
-         sns=1;
-         }
+     if(response.indexOf("sensorac")!=-1){ 
+        sns=1; mpusure=0;  
+        SMS(mesaj="Hareket Sensoru Aktif");   
+        } GPS();
   }
 
 SIM800L.listen();
 if (SIM800L.available()>0){ response = SIM800L.readStringUntil('\n');}
    if(lastStringLength != response.length()){     
       if(response.indexOf("sensorkapat")!=-1){ 
-        SMS(mesaj="Hareket Sensoru Kapatildi");        
-        sns=0;
-       }
+        sns=0; mpusure=0;
+        SMS(mesaj="Hareket Sensoru Kapatildi");         
+       } GPS();
   }
 
+SIM800L.listen();
+if (SIM800L.available()>0){ response = SIM800L.readStringUntil('\n');}
+   if(lastStringLength != response.length()){     
+      if(response.indexOf("acilkonum")!=-1){ 
+        sns=0; mpusure=0;    
+         acilkonum(5);
+          } GPS();    
+  }
 
- 
- if (sns==1 && mpusure>=10) { ARA(); delay(aramasuresi); mpusure=0; }
-          
-
+if (mpusure>=10) { 
+          ARA(); 
+          delay(1000); 
+          SMS(mesaj="ARAC TEHLIKEDE !!! 5 adet acil konum bekleniyor..."); 
+          delay(1000); 
+          acilkonum(5);
+          mpusure=0; sns=0;          
+                  }
+  
 }
-
-
