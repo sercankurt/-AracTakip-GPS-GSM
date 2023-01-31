@@ -18,7 +18,7 @@ long angle_x, angle_y, angle_z, offset_x, offset_y, offset_z;
 MPU6050 mpu (Wire);
 int b = 0;
 int sns = 0; //Sensor durum
-int mpusure=0;
+int mpusure = 0;
 
 void GPS(){
   if(Serial1.available()) {
@@ -56,13 +56,16 @@ digitalWrite(LED_BUILTIN, HIGH); delay(b);}
 
 void MPUBILGI(){
   
- for(int i=0; i<5; i++){
+ for(int i=0; i<10; i++){
   mpu.Execute();
   angle_x = mpu.GetAngX();
   angle_y = mpu.GetAngY();
   angle_z = mpu.GetAngZ(); }
-   
-if ( pos_offset < angle_x - offset_x || neg_offset > angle_x - offset_x || pos_offset < angle_y - offset_y || neg_offset > angle_y - offset_y || pos_offset < angle_z - offset_z || neg_offset > angle_z - offset_z){
+
+if (sns==1) { 
+if (pos_offset < angle_x - offset_x || neg_offset > angle_x - offset_x || pos_offset < angle_y - offset_y || neg_offset > angle_y - offset_y || pos_offset < angle_z - offset_z || neg_offset > angle_z - offset_z)
+    {
+  
   BLINK(b=500);
   mpusure++;   SerialUSB.print("Mpu Süre = "); SerialUSB.println(mpusure);
   SerialUSB.print("AngX = ");       SerialUSB.print(angle_x - offset_x);
@@ -71,9 +74,8 @@ if ( pos_offset < angle_x - offset_x || neg_offset > angle_x - offset_x || pos_o
   mpu.Execute();
   offset_x = mpu.GetAngX();
   offset_y = mpu.GetAngY();
-  offset_z = mpu.GetAngZ();
-
- }
+  offset_z = mpu.GetAngZ(); }
+   }
 }
 void setup() {
     mpu.Initialize();
@@ -149,8 +151,11 @@ if (SIM800L.available()>0){ response = SIM800L.readStringUntil('\n');}
        }
   }
 
-if (sns==1) {
-        if (mpusure>=10) { ARA(); delay(aramasuresi); mpusure=0; }
-            }
-                         
+
+ 
+ if (sns==1 && mpusure>=10) { ARA(); delay(aramasuresi); mpusure=0; }
+          
+
 }
+
+
