@@ -5,7 +5,7 @@ SoftwareSerial SIM800L(0,1);
 #include <TinyGPS++.h>        //-----> N E O  6 M       Kutuphaneler
 TinyGPSPlus gps;
 
-String TELNO = "05542147154"; //-----> Alıcı telefon numarası
+String TELNO = "0XXXxxxXXxx"; //-----> Alıcı telefon numarası
 int aramasuresi = 16000;
 
 double latitude, longitude;
