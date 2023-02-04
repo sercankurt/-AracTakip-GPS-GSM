@@ -4,7 +4,7 @@ SoftwareSerial SIM800L(0,1);
 #include <TinyGPS++.h>        //-----> N E O  6 M       Kutuphaneler
 TinyGPSPlus gps;
 
-String TELNO = "XXXXxxxXXxx"; //-----> Alıcı telefon numarası
+String TELNO = "0xxxxxxxxxx"; //-----> Alıcı telefon numarası
 int aramasuresi = 16000;
 
 double latitude, longitude;
@@ -32,17 +32,12 @@ SIM800L.println((char)26);                    delay(1000);
 SerialUSB.println("Sms gonderildi.");}
 
 void GPS(){
-  if(Serial1.available()) { gps.encode(Serial1.read()); }
-        
+  if(Serial1.available()) { gps.encode(Serial1.read()); }    
   if(gps.location.isUpdated()) {
     latitude = gps.location.lat();
     longitude = gps.location.lng(); 
-
-           if (gps.location.lat() && gps.location.lng() !=-1) {
-           link = "www.google.com/maps/place/" + String(latitude, 6) + "," + String(longitude, 6) ;
-           SerialUSB.println(link); 
-           } else { link = "GPS Uydulari Bulunamadi !" ;  SerialUSB.println(link);  }
-    }
+    link = "www.google.com/maps/place/" + String(latitude, 6) + "," + String(longitude, 6) ;
+    SerialUSB.println(link); }
 }
 
 void ARA(){ 
@@ -98,19 +93,16 @@ void setup() {
     //while(!SerialUSB){;}
     SIM800L.begin(9600);      //-----> SIM800L
  
-    delay(7000);             //-----> SIM800L bağlanana kadar verilmiş olan zaman
+    delay(10000);             //-----> SIM800L bağlanana kadar verilmiş olan zaman
     
   pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, LOW); delay(500);  
-  digitalWrite(LED_BUILTIN, HIGH);delay(500);
-  digitalWrite(LED_BUILTIN, LOW); delay(400); 
-  digitalWrite(LED_BUILTIN, HIGH);delay(400);
-  digitalWrite(LED_BUILTIN, LOW); delay(300); 
-  digitalWrite(LED_BUILTIN, HIGH);delay(300);
+ 
   digitalWrite(LED_BUILTIN, LOW); delay(200); 
   digitalWrite(LED_BUILTIN, HIGH);delay(200);
-  digitalWrite(LED_BUILTIN, LOW); delay(100); 
-  digitalWrite(LED_BUILTIN, HIGH);delay(100);
+  digitalWrite(LED_BUILTIN, LOW); delay(200); 
+  digitalWrite(LED_BUILTIN, HIGH);delay(200);
+  digitalWrite(LED_BUILTIN, LOW); delay(200); 
+  digitalWrite(LED_BUILTIN, HIGH);delay(200);
   
     SIM800L.println("AT");        delay(1000); 
     SIM800L.println("AT+CMGF=1"); delay(1000);
@@ -132,6 +124,8 @@ void setup() {
   SerialUSB.print("  /  offsetZ = "); SerialUSB.println(offset_z);
 
  SMS(mesaj="GPS cihazi baslatildi **** SMS-> 'konumat' (anlik konum) ** SMS-> 'acilkonum' (art arda konum) ** SMS-> 'sensorac' (hareket sensorunu ac) ** SMS-> 'sensorkapat' (hareket sensorunu kapat)");
+ digitalWrite(LED_BUILTIN, LOW); delay(100); 
+ digitalWrite(LED_BUILTIN, HIGH);delay(100);
 }
 
 void loop() {
@@ -155,8 +149,8 @@ if (SIM800L.available()>0){ response = SIM800L.readStringUntil('\n'); }
         SMS(mesaj="Hareket Sensoru Kapatildi"); } GPS();
 
      if(response.indexOf("acilkonum")!=-1){ 
-        sns=0; mpusure=0;    
-        acilkonum(5,5000); } GPS();
+        sns=0; mpusure=0;   
+        acilkonum(5,2000); } GPS();
     }
  
 
@@ -165,7 +159,7 @@ if (mpusure>=10) {
           delay(1000); 
           SMS(mesaj="ARAC TEHLIKEDE !!! 5 adet acil konum bekleniyor..."); 
           delay(1000); 
-          acilkonum(5,5000);
+          acilkonum(5,2000);
           mpusure=0; sns=0;          
                   }
 }
