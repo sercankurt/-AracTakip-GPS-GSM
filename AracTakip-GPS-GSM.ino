@@ -1,10 +1,10 @@
-#include <TinyMPU6050.h>      //-----> M P U  6 0 5 0   Kutuphaneler
+ #include <TinyMPU6050.h>      //-----> M P U  6 0 5 0   Kutuphaneler
 #include <SoftwareSerial.h>   //-----> S I M  8 0 0     Kutuphaneler
 SoftwareSerial SIM800L(0,1);
 #include <TinyGPS++.h>        //-----> N E O  6 M       Kutuphaneler
 TinyGPSPlus gps;
 
-String TELNO = "0xxxxxxxxxx"; //-----> Alıcı telefon numarası
+String TELNO = "05XXxxxXXxx"; //-----> Alıcı telefon numarası
 int aramasuresi = 16000;
 
 double latitude, longitude;
@@ -19,9 +19,7 @@ int b = 0;
 int sns = 0; //Sensor durum
 int mpusure = 0;
 
-int acilsms = 0;
-int acilsms_sure = 0;
-
+int hiz = 0;
 
 void SMS(String mesaj){
 SerialUSB.println("Sms gonderiliyor...");
@@ -36,7 +34,8 @@ void GPS(){
   if(gps.location.isUpdated()) {
     latitude = gps.location.lat();
     longitude = gps.location.lng(); 
-    link = "www.google.com/maps/place/" + String(latitude, 6) + "," + String(longitude, 6) ;
+    hiz = gps.speed.kmph();
+    link = "www.google.com/maps/place/" + String(latitude, 6) + "," + String(longitude, 6) + "    " + "hiz: " + hiz + " km/s";
     SerialUSB.println(link); }
 }
 
@@ -56,9 +55,12 @@ digitalWrite(LED_BUILTIN, LOW);  delay(b);
 digitalWrite(LED_BUILTIN, HIGH); delay(b);}
 
 void acilkonum(int acilsms, int acilsms_sure) {
- for (int h=0; h<acilsms; h++){ GPS();    
-         SMS(mesaj=link); delay(acilsms_sure);
-         if(h>=acilsms) {h=0;} 
+ for (int h=0; h<=acilsms; h++){   
+         SMS(mesaj=link); 
+          delay(10);
+          for(int n = 0 ; n<acilsms_sure ; n++ ) { GPS(); delay(5); if(n>acilsms_sure){ n=0; goto h;}  } 
+         h:
+         if(h>acilsms) {h=0; break;} 
          }
     }
 
@@ -136,21 +138,21 @@ MPUBILGI();
 SIM800L.listen();
 if (SIM800L.available()>0){ response = SIM800L.readStringUntil('\n'); }
    if(lastStringLength != response.length()){ 
-
+      
      if(response.indexOf("konumat")!=-1){    
         SMS(mesaj=link); } GPS(); 
-     
+        
      if(response.indexOf("sensorac")!=-1){ 
-        sns=1; mpusure=0;  
-        SMS(mesaj="Hareket Sensoru Aktif"); } GPS();
+        sns=1; mpusure=0;
+        SMS(mesaj="Hareket Sensoru Aktif"); } GPS(); 
         
      if(response.indexOf("sensorkapat")!=-1){ 
         sns=0; mpusure=0;
-        SMS(mesaj="Hareket Sensoru Kapatildi"); } GPS();
+        SMS(mesaj="Hareket Sensoru Kapatildi"); } GPS(); 
 
      if(response.indexOf("acilkonum")!=-1){ 
-        sns=0; mpusure=0;   
-        acilkonum(5,2000); } GPS();
+        sns=0; mpusure=0;
+        acilkonum(6,250); } GPS(); 
     }
  
 
@@ -159,7 +161,7 @@ if (mpusure>=10) {
           delay(1000); 
           SMS(mesaj="ARAC TEHLIKEDE !!! 5 adet acil konum bekleniyor..."); 
           delay(1000); 
-          acilkonum(5,2000);
+          acilkonum(6,250);
           mpusure=0; sns=0;          
                   }
 }
